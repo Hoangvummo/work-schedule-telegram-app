@@ -1,0 +1,345 @@
+{
+  "users": [
+    {
+      "id": "usr_manager_1",
+      "username": "admin",
+      "password": "123456",
+      "name": "Vũ Hoàng (Quản lý)",
+      "role": "MANAGER",
+      "department": "Ban Giám Đốc",
+      "color": "#4F46E5",
+      "telegramChatId": "",
+      "telegramUsername": "vuhoang_admin",
+      "active": true,
+      "createdAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "usr_staff_trang",
+      "username": "trang",
+      "password": "123456",
+      "name": "Trang (Kế toán trưởng)",
+      "role": "STAFF",
+      "department": "Phòng Kế toán & Thuế",
+      "color": "#059669",
+      "telegramChatId": "",
+      "telegramUsername": "trang_ketoan",
+      "active": true,
+      "createdAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "usr_staff_minh",
+      "username": "minh",
+      "password": "123456",
+      "name": "Minh Anh (Chuyên viên Thuế)",
+      "role": "STAFF",
+      "department": "Phòng Kế toán SME & HKD",
+      "color": "#D97706",
+      "telegramChatId": "",
+      "telegramUsername": "minhanh_tax",
+      "active": true,
+      "createdAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "usr_staff_khanh",
+      "username": "khanh",
+      "password": "123456",
+      "name": "Quốc Khánh (Marketing & CSKH)",
+      "role": "STAFF",
+      "department": "Phòng Marketing & Kinh doanh",
+      "color": "#E11D48",
+      "telegramChatId": "",
+      "telegramUsername": "quockhanh_mkt",
+      "active": true,
+      "createdAt": "2026-11-03T05:19:47.475Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "tsk_rec_2days",
+      "title": "Kiểm tra & đối chiếu hóa đơn điện tử đầu vào/ra trên TCT",
+      "description": "Đăng nhập hệ thống Hóa đơn điện tử Tổng cục Thuế, rà soát hóa đơn mới phát sinh của nhóm khách hàng SME và cảnh báo sai sót kịp thời.",
+      "category": "TAX_ACCOUNTING",
+      "priority": "HIGH",
+      "assigneeId": "usr_staff_minh",
+      "createdById": "usr_manager_1",
+      "scheduleType": "RECURRING",
+      "startTime": "09:00",
+      "endTime": "10:30",
+      "recurrence": {
+        "frequency": "DAILY",
+        "interval": 2,
+        "startDate": "2026-11-02"
+      },
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "08:30",
+        "09:00"
+      ],
+      "notifyBeforeMinutes": [
+        15
+      ],
+      "notifyTarget": "PERSONAL",
+      "remindIfOverdue": true,
+      "subtasks": [
+        {
+          "id": "sub_1",
+          "title": "Tải bảng kê XML/Excel hóa đơn mua vào - bán ra",
+          "completed": true
+        },
+        {
+          "id": "sub_2",
+          "title": "Kiểm tra trạng thái MST nhà cung cấp",
+          "completed": false
+        },
+        {
+          "id": "sub_3",
+          "title": "Cập nhật file theo dõi & báo cáo khách hàng",
+          "completed": false
+        }
+      ],
+      "occurrenceStatuses": {
+        "2026-11-02": {
+          "status": "DONE",
+          "updatedAt": "2026-11-03T05:19:47.475Z",
+          "completedAt": "2026-11-03T05:19:47.475Z"
+        }
+      },
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "tsk_rec_weekly_trang",
+      "title": "Rà soát hồ sơ kê khai thuế & duyệt tờ khai định kỳ",
+      "description": "Kiểm tra chéo số liệu sổ sách kế toán, duyệt hồ sơ hoàn thuế / giải trình cơ quan thuế cho các doanh nghiệp trọng điểm.",
+      "category": "TAX_ACCOUNTING",
+      "priority": "URGENT",
+      "assigneeId": "usr_staff_trang",
+      "createdById": "usr_manager_1",
+      "scheduleType": "RECURRING",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "recurrence": {
+        "frequency": "WEEKLY",
+        "interval": 1,
+        "daysOfWeek": [
+          1,
+          3,
+          5
+        ],
+        "startDate": "2026-11-02"
+      },
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "08:00",
+        "13:45"
+      ],
+      "notifyBeforeMinutes": [
+        15
+      ],
+      "notifyTarget": "BOTH",
+      "remindIfOverdue": true,
+      "subtasks": [
+        {
+          "id": "sub_t1",
+          "title": "Duyệt bảng cân đối phát sinh các công ty SME",
+          "completed": false
+        },
+        {
+          "id": "sub_t2",
+          "title": "Kiểm tra công văn giải trình thuế tồn đọng",
+          "completed": false
+        }
+      ],
+      "occurrenceStatuses": {},
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "tsk_multidate_khanh",
+      "title": "Lên lịch bài viết & Báo cáo chuyển đổi chiến dịch Marketing",
+      "description": "Tổng hợp chỉ số Leads từ kênh Facebook/TikTok/Website, cập nhật danh sách khách hàng tiềm năng cần tư vấn kế toán.",
+      "category": "MARKETING",
+      "priority": "MEDIUM",
+      "assigneeId": "usr_staff_khanh",
+      "createdById": "usr_manager_1",
+      "scheduleType": "MULTI_DATE",
+      "startTime": "10:30",
+      "endTime": "11:45",
+      "selectedDates": [
+        "2026-11-03",
+        "2026-11-05",
+        "2026-11-08",
+        "2026-11-10"
+      ],
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "10:00",
+        "16:00"
+      ],
+      "notifyBeforeMinutes": [
+        30
+      ],
+      "notifyTarget": "PERSONAL",
+      "remindIfOverdue": false,
+      "subtasks": [
+        {
+          "id": "sub_k1",
+          "title": "Xuất báo cáo chi phí & CPL từng chiến dịch",
+          "completed": true
+        },
+        {
+          "id": "sub_k2",
+          "title": "Bàn giao danh sách SĐT khách mới cho bộ phận tư vấn",
+          "completed": false
+        }
+      ],
+      "occurrenceStatuses": {},
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "tsk_single_manager",
+      "title": "Họp điều phối công việc & Đánh giá KPI toàn công ty",
+      "description": "Rà soát tiến độ công việc các phòng ban, tháo gỡ vướng mắc hồ sơ khách hàng và chốt mục tiêu tuần mới.",
+      "category": "MEETING",
+      "priority": "HIGH",
+      "assigneeId": "usr_manager_1",
+      "createdById": "usr_manager_1",
+      "scheduleType": "SINGLE",
+      "startTime": "15:30",
+      "endTime": "17:00",
+      "singleDate": "2026-11-03",
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "08:00",
+        "15:15"
+      ],
+      "notifyBeforeMinutes": [
+        15
+      ],
+      "notifyTarget": "GROUP",
+      "remindIfOverdue": true,
+      "subtasks": [
+        {
+          "id": "sub_m1",
+          "title": "Tổng hợp báo cáo tiến độ từ hệ thống lịch",
+          "completed": true
+        },
+        {
+          "id": "sub_m2",
+          "title": "Phân bổ đầu việc ưu tiên tuần tới",
+          "completed": false
+        }
+      ],
+      "occurrenceStatuses": {},
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "tsk_rec_3days_minh",
+      "title": "Chăm sóc & Nhắc lịch nộp chứng từ cho Hộ Kinh Doanh",
+      "description": "Liên hệ các Hộ kinh doanh / KOLs gửi sao kê ngân hàng và chứng từ chi phí định kỳ 3 ngày/lần.",
+      "category": "CLIENT",
+      "priority": "MEDIUM",
+      "assigneeId": "usr_staff_minh",
+      "createdById": "usr_manager_1",
+      "scheduleType": "RECURRING",
+      "startTime": "15:00",
+      "endTime": "16:30",
+      "recurrence": {
+        "frequency": "DAILY",
+        "interval": 3,
+        "startDate": "2026-11-03"
+      },
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "14:45"
+      ],
+      "notifyBeforeMinutes": [
+        15
+      ],
+      "notifyTarget": "PERSONAL",
+      "remindIfOverdue": false,
+      "subtasks": [],
+      "occurrenceStatuses": {},
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "tsk_single_tomorrow_trang",
+      "title": "Làm việc với Đoàn kiểm tra thuế & Bảo vệ số liệu khách hàng",
+      "description": "Chuẩn bị đầy đủ sổ cái, tờ khai quyết toán và chứng từ gốc để giải trình trực tiếp.",
+      "category": "TAX_ACCOUNTING",
+      "priority": "URGENT",
+      "assigneeId": "usr_staff_trang",
+      "createdById": "usr_manager_1",
+      "scheduleType": "SINGLE",
+      "startTime": "08:30",
+      "endTime": "11:30",
+      "singleDate": "2026-11-04",
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "07:30",
+        "08:15"
+      ],
+      "notifyBeforeMinutes": [
+        15
+      ],
+      "notifyTarget": "BOTH",
+      "remindIfOverdue": true,
+      "subtasks": [
+        {
+          "id": "sub_tr1",
+          "title": "In bộ hồ sơ quyết toán & bảng giải trình",
+          "completed": false
+        },
+        {
+          "id": "sub_tr2",
+          "title": "Kiểm tra giấy ủy quyền đại diện làm việc",
+          "completed": true
+        }
+      ],
+      "occurrenceStatuses": {},
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    },
+    {
+      "id": "tsk_single_in3days_khanh",
+      "title": "Quay video chia sẻ kiến thức Thuế HKD & KOLs cùng Kế toán trưởng",
+      "description": "Chuẩn bị kịch bản, thiết bị ánh sáng và mic thu âm cho buổi quay 5 video ngắn.",
+      "category": "MARKETING",
+      "priority": "HIGH",
+      "assigneeId": "usr_staff_khanh",
+      "createdById": "usr_manager_1",
+      "scheduleType": "SINGLE",
+      "startTime": "13:30",
+      "endTime": "16:30",
+      "singleDate": "2026-11-06",
+      "telegramEnabled": true,
+      "notifyTimes": [
+        "09:00",
+        "13:00"
+      ],
+      "notifyBeforeMinutes": [
+        30
+      ],
+      "notifyTarget": "BOTH",
+      "remindIfOverdue": false,
+      "subtasks": [],
+      "occurrenceStatuses": {},
+      "createdAt": "2026-11-03T05:19:47.475Z",
+      "updatedAt": "2026-11-03T05:19:47.475Z"
+    }
+  ],
+  "telegramConfig": {
+    "botToken": "",
+    "botUsername": "",
+    "groupChatId": "",
+    "managerChatId": "",
+    "dailyDigestEnabled": true,
+    "dailyDigestTime": "07:30",
+    "autoWorkerEnabled": true
+  },
+  "notificationLogs": [],
+  "sentDeduplicationKeys": {}
+}

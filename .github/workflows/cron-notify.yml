@@ -1,0 +1,24 @@
+name: Telegram Schedule Notifier Cron
+
+on:
+  schedule:
+    # Chạy định kỳ để đánh thức API kiểm tra lịch báo Telegram trên Vercel
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  trigger-vercel-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Vercel Notification Worker
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "APP_URL secret chưa được cấu hình"
+            exit 0
+          fi
+          curl -s -X POST "$APP_URL/api/cron/notify" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json"
