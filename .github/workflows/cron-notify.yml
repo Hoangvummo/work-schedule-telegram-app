@@ -12,13 +12,9 @@ jobs:
     steps:
       - name: Ping Vercel Notification Worker
         env:
-          APP_URL: ${{ secrets.APP_URL }}
+          APP_URL: ${{ secrets.APP_URL || 'https://work-schedule-app-five.vercel.app' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          if [ -z "$APP_URL" ]; then
-            echo "APP_URL secret chưa được cấu hình"
-            exit 0
-          fi
           curl -s -X POST "$APP_URL/api/cron/notify" \
             -H "Authorization: Bearer $CRON_SECRET" \
             -H "Content-Type: application/json"
