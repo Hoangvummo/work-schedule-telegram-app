@@ -18,17 +18,17 @@ const PRIORITY_LABELS: Record<string, string> = {
   LOW: '🟢 Thấp',
   MEDIUM: '🔵 Trung bình',
   HIGH: '🟠 Cao',
-  URGENT: '🔴 Khẩn cấp',
+  URGENT: '🔴 Quan trọng',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  TAX_ACCOUNTING: '📊 Kế toán - Thuế',
-  CLIENT: '🤝 Khách hàng',
-  MEETING: '📅 Họp nội bộ',
-  REPORT: '📑 Báo cáo',
-  OPERATION: '⚙️ Vận hành',
-  MARKETING: '📣 Marketing',
-  OTHER: '📌 Khác',
+  TAX_ACCOUNTING: '💼 Công việc',
+  CLIENT: '🎯 Dự án & Mục tiêu',
+  MEETING: '📅 Sự kiện & Lịch hẹn',
+  REPORT: '📚 Học tập & Kỹ năng',
+  OPERATION: '💰 Tài chính & Hóa đơn',
+  MARKETING: '💪 Sức khỏe & Thói quen',
+  OTHER: '🏠 Cá nhân & Khác',
 };
 
 export function escapeHtml(str: string): string {

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'WorkFlow & Telegram Scheduler — Hệ thống Quản lý Lịch Làm Việc',
+  title: 'SmartSchedule & Telegram — Lịch Trình Cá Nhân & Nhắc Việc Tự Động',
   description:
-    'Hệ thống lên lịch làm việc định kỳ, lịch tự chọn theo ngày, phân quyền nhân sự và tự động thông báo Telegram theo giờ tự chọn.',
+    'Ứng dụng lên lịch định kỳ, lịch tự chọn theo ngày và tự động thông báo Telegram theo giờ tự chọn.',
 };
 
 export default function RootLayout({

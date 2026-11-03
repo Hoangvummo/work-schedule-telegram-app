@@ -18,23 +18,13 @@ export async function GET() {
 
   const db = await readDb();
 
-  // STAFF chỉ xem được lịch sử thông báo của các việc giao cho mình
   const visibleLogs =
     currentUser.role === 'MANAGER'
       ? db.notificationLogs
       : db.notificationLogs.filter((l) => l.assigneeId === currentUser.id);
 
-  // Ẩn bớt Bot Token nếu là STAFF
-  const config =
-    currentUser.role === 'MANAGER'
-      ? db.telegramConfig
-      : {
-          ...db.telegramConfig,
-          botToken: db.telegramConfig.botToken ? '******** (Đã cấu hình bởi Quản lý)' : '',
-        };
-
   return NextResponse.json({
-    config,
+    config: db.telegramConfig,
     hasBotToken: Boolean(db.telegramConfig.botToken && db.telegramConfig.botToken.trim()),
     logs: visibleLogs.slice(0, 60),
   });
@@ -51,15 +41,8 @@ export async function POST(req: NextRequest) {
     const action = body.action;
     const db = await readDb();
 
-    // 1. Lưu cấu hình Telegram (Chỉ Quản lý)
+    // 1. Lưu cấu hình Telegram
     if (action === 'save_config') {
-      if (currentUser.role !== 'MANAGER') {
-        return NextResponse.json(
-          { error: 'Chỉ Quản lý mới có quyền thay đổi cấu hình Bot hệ thống' },
-          { status: 403 }
-        );
-      }
-
       db.telegramConfig = {
         ...db.telegramConfig,
         botToken:
@@ -98,13 +81,12 @@ export async function POST(req: NextRequest) {
 
     // 2. Quét danh sách người dùng vừa nhắn /start cho Bot
     if (action === 'discover_chats') {
-      const tokenToUse =
-        currentUser.role === 'MANAGER' && body.botToken
-          ? String(body.botToken).trim()
-          : db.telegramConfig.botToken;
+      const tokenToUse = body.botToken
+        ? String(body.botToken).trim()
+        : db.telegramConfig.botToken;
 
       const result = await discoverRecentTelegramChats(tokenToUse);
-      if (result.ok && result.botInfo && currentUser.role === 'MANAGER') {
+      if (result.ok && result.botInfo) {
         db.telegramConfig.botUsername = result.botInfo.username;
         if (body.botToken) {
           db.telegramConfig.botToken = String(body.botToken).trim();
@@ -116,10 +98,9 @@ export async function POST(req: NextRequest) {
 
     // 3. Gửi tin nhắn Test kết nối Telegram
     if (action === 'test_message') {
-      const tokenToUse =
-        currentUser.role === 'MANAGER' && body.botToken
-          ? String(body.botToken).trim()
-          : db.telegramConfig.botToken;
+      const tokenToUse = body.botToken
+        ? String(body.botToken).trim()
+        : db.telegramConfig.botToken;
 
       const targetChatId =
         String(body.chatId || '').trim() ||
@@ -131,9 +112,9 @@ export async function POST(req: NextRequest) {
       const testHtml = [
         `✅ <b>KIỂM TRA KẾT NỐI TELEGRAM THÀNH CÔNG!</b>`,
         `━━━━━━━━━━━━━━━━━━━━`,
-        `👤 <b>Người gửi test:</b> ${currentUser.name}`,
+        `👤 <b>Tài khoản:</b> ${currentUser.name}`,
         `🕒 <b>Giờ hệ thống (VN):</b> ${nowVN.timeStr} - ${nowVN.dateStr}`,
-        `🚀 <b>Trạng thái:</b> Hệ thống Lịch làm việc đã sẵn sàng tự động bắn thông báo theo giờ hẹn!`,
+        `🚀 <b>Trạng thái:</b> Lịch cá nhân của bạn đã sẵn sàng tự động bắn thông báo theo giờ hẹn!`,
       ].join('\n');
 
       const res = await sendTelegramMessage({
@@ -169,9 +150,6 @@ export async function POST(req: NextRequest) {
 
     // 5. Cài đặt Telegram Webhook 1-click khi chạy trên Vercel
     if (action === 'set_webhook') {
-      if (currentUser.role !== 'MANAGER') {
-        return NextResponse.json({ error: 'Chỉ Quản lý được phép cài Webhook' }, { status: 403 });
-      }
       const tokenToUse = String(body.botToken || db.telegramConfig.botToken || '').trim();
       const webhookUrl = String(body.webhookUrl || '').trim();
 

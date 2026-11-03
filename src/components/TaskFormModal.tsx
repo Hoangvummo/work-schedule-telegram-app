@@ -242,6 +242,8 @@ export default function TaskFormModal({
     miniCalDays.push(`${pickerYearMonth.year}-${mStr}-${dStr}`);
   }
 
+  const showAccountSelector = currentUser.role === 'MANAGER' && users.length > 1;
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
@@ -249,7 +251,7 @@ export default function TaskFormModal({
         <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-lg font-bold">
-              {initialTask ? 'Chỉnh sửa Lịch Làm Việc' : 'Tạo Lịch Làm Việc & Hẹn Giờ Telegram'}
+              {initialTask ? 'Chỉnh sửa Lịch Trình' : 'Tạo Lịch Mới & Hẹn Giờ Telegram'}
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               Hỗ trợ lịch định kỳ (VD: 2 ngày 1 lần), lịch tự chọn nhiều ngày và bắn Telegram theo giờ tự chọn
@@ -268,25 +270,25 @@ export default function TaskFormModal({
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* Basic info */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-            <div className="sm:col-span-8">
+            <div className={showAccountSelector ? 'sm:col-span-8' : 'sm:col-span-12'}>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Tên công việc / Lịch làm việc *
+                Tiêu đề công việc / Lịch hẹn *
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="VD: Kiểm tra hóa đơn điện tử / Báo cáo doanh thu / Họp khách hàng..."
+                placeholder="Nhập tên việc cần làm, thói quen, lịch hẹn..."
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
 
-            <div className="sm:col-span-4">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Nhân sự phụ trách
-              </label>
-              {currentUser.role === 'MANAGER' ? (
+            {showAccountSelector && (
+              <div className="sm:col-span-4">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                  Tài khoản
+                </label>
                 <select
                   value={assigneeId}
                   onChange={(e) => setAssigneeId(e.target.value)}
@@ -294,37 +296,32 @@ export default function TaskFormModal({
                 >
                   {users.map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.name} ({u.department})
+                      {u.name}
                     </option>
                   ))}
                 </select>
-              ) : (
-                <div className="px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <UserIcon className="w-4 h-4 text-indigo-600" />
-                  <span className="truncate">{currentUser.name}</span>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Category, Priority, Time slot */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                Danh mục
+                Nhãn phân loại
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as TaskCategory)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold bg-white"
               >
-                <option value="TAX_ACCOUNTING">📊 Kế toán - Thuế</option>
-                <option value="CLIENT">🤝 Khách hàng</option>
-                <option value="MEETING">📅 Họp nội bộ</option>
-                <option value="REPORT">📑 Báo cáo</option>
-                <option value="MARKETING">📣 Marketing</option>
-                <option value="OPERATION">⚙️ Vận hành</option>
-                <option value="OTHER">📌 Công việc khác</option>
+                <option value="TAX_ACCOUNTING">💼 Công việc</option>
+                <option value="CLIENT">🎯 Dự án & Mục tiêu</option>
+                <option value="MEETING">📅 Sự kiện & Lịch hẹn</option>
+                <option value="REPORT">📚 Học tập & Kỹ năng</option>
+                <option value="MARKETING">💪 Sức khỏe & Thói quen</option>
+                <option value="OPERATION">💰 Tài chính & Hóa đơn</option>
+                <option value="OTHER">🏠 Cá nhân & Khác</option>
               </select>
             </div>
 
@@ -822,9 +819,9 @@ export default function TaskFormModal({
                       onChange={(e) => setNotifyTarget(e.target.value as NotifyTarget)}
                       className="w-full px-3 py-1.5 border border-sky-300 rounded-xl text-xs font-semibold bg-white"
                     >
-                      <option value="PERSONAL">👤 Nhắn riêng vào Telegram của Nhân sự phụ trách</option>
-                      <option value="GROUP">👥 Nhắn vào Group Telegram chung & Tag tên nhân sự</option>
-                      <option value="BOTH">🔔 Cả hai (Nhắn riêng Nhân sự + Group chung)</option>
+                      <option value="PERSONAL">👤 Tin nhắn Telegram cá nhân</option>
+                      <option value="GROUP">👥 Nhóm Telegram (Group Chat)</option>
+                      <option value="BOTH">🔔 Cả tin nhắn cá nhân & Nhóm</option>
                     </select>
                   </div>
                 </div>

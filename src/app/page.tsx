@@ -46,31 +46,31 @@ type ViewMode = 'MONTH' | 'WEEK' | 'AGENDA' | 'KANBAN';
 
 const CATEGORY_BADGES: Record<string, { label: string; cls: string }> = {
   TAX_ACCOUNTING: {
-    label: '📊 Kế toán - Thuế',
+    label: '💼 Công việc',
     cls: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   },
   CLIENT: {
-    label: '🤝 Khách hàng',
+    label: '🎯 Dự án & Mục tiêu',
     cls: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   MEETING: {
-    label: '📅 Họp nội bộ',
+    label: '📅 Sự kiện & Lịch hẹn',
     cls: 'bg-amber-50 text-amber-700 border-amber-200',
   },
   REPORT: {
-    label: '📑 Báo cáo',
+    label: '📚 Học tập & Kỹ năng',
     cls: 'bg-purple-50 text-purple-700 border-purple-200',
   },
   MARKETING: {
-    label: '📣 Marketing',
+    label: '💪 Sức khỏe & Thói quen',
     cls: 'bg-rose-50 text-rose-700 border-rose-200',
   },
   OPERATION: {
-    label: '⚙️ Vận hành',
+    label: '💰 Tài chính & Hóa đơn',
     cls: 'bg-cyan-50 text-cyan-700 border-cyan-200',
   },
   OTHER: {
-    label: '📌 Khác',
+    label: '🏠 Cá nhân & Khác',
     cls: 'bg-slate-100 text-slate-700 border-slate-200',
   },
 };
@@ -79,7 +79,7 @@ const PRIORITY_BADGES: Record<string, { label: string; cls: string }> = {
   LOW: { label: 'Thấp', cls: 'bg-slate-100 text-slate-600' },
   MEDIUM: { label: 'Trung bình', cls: 'bg-sky-100 text-sky-700' },
   HIGH: { label: 'Cao', cls: 'bg-amber-100 text-amber-800' },
-  URGENT: { label: 'Khẩn cấp', cls: 'bg-rose-100 text-rose-700 font-bold' },
+  URGENT: { label: 'Quan trọng', cls: 'bg-rose-100 text-rose-700 font-bold' },
 };
 
 const DOW_HEADERS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
@@ -400,7 +400,7 @@ export default function WorkScheduleAppPage() {
       const errDetail =
         data.logs?.[0]?.error ||
         data.error ||
-        'Chưa cấu hình Telegram Bot Token hoặc Chat ID nhân sự';
+        'Chưa cấu hình Telegram Bot Token hoặc Chat ID';
       showToast('error', `Không gửi được Telegram: ${errDetail}`);
       setAdminModalTab('TELEGRAM');
       setIsAdminModalOpen(true);
@@ -525,7 +525,6 @@ export default function WorkScheduleAppPage() {
   if (!currentUser) {
     return (
       <LoginView
-        availableAccounts={availableAccounts}
         onLoginSuccess={(u) => {
           setCurrentUser(u);
           checkAuthentication();
@@ -555,35 +554,27 @@ export default function WorkScheduleAppPage() {
       {/* TOP HEADER BAR */}
       <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-md">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          {/* Brand & Role Status */}
+          {/* Brand & User Info */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: currentUser.color || '#4F46E5' }}
+            >
               <CalendarIcon className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-bold text-base tracking-tight">
-                  WorkSchedule & Telegram Pro
+                  SmartSchedule & Telegram
                 </h1>
-                {currentUser.role === 'MANAGER' ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    QUẢN LÝ (Xem toàn bộ NV)
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                    <Lock className="w-3 h-3" />
-                    NHÂN SỰ (Chỉ xem lịch cá nhân)
-                  </span>
-                )}
               </div>
               <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
                 <span>
-                  Xin chào, <b className="text-slate-200">{currentUser.name}</b> ({currentUser.department})
+                  Xin chào, <b className="text-slate-200">{currentUser.name}</b>
                 </span>
                 <span>•</span>
                 <span className="text-sky-400 font-medium">
-                  🕒 Giờ VN: {timeVN} ({formatDisplayDateVN(todayVN)})
+                  🕒 {timeVN} ({formatDisplayDateVN(todayVN)})
                 </span>
               </div>
             </div>
@@ -591,35 +582,6 @@ export default function WorkScheduleAppPage() {
 
           {/* Right Header Controls */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Quick Role/Account Switcher for instant testing */}
-            <div className="hidden xl:flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-xl p-1 mr-1">
-              <span className="text-[11px] text-slate-400 px-2 font-medium">
-                Đổi nhanh TK:
-              </span>
-              {availableAccounts.map((acc) => {
-                const active = acc.id === currentUser.id;
-                return (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    onClick={() => handleQuickSwitchAccount(acc.username)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 ${
-                      active
-                        ? 'bg-indigo-600 text-white shadow'
-                        : 'text-slate-300 hover:bg-slate-700'
-                    }`}
-                    title={`Chuyển sang tài khoản ${acc.name} (${acc.role})`}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: acc.color }}
-                    />
-                    <span>{acc.username}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             <button
               type="button"
               onClick={() => {
@@ -629,36 +591,32 @@ export default function WorkScheduleAppPage() {
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/25 flex items-center gap-1.5 transition"
             >
               <Plus className="w-4 h-4" />
-              <span>Tạo Lịch Làm Việc</span>
+              <span>Tạo Lịch Mới</span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setAdminModalTab(currentUser.role === 'MANAGER' ? 'TELEGRAM' : 'STAFF');
+                setAdminModalTab('TELEGRAM');
                 setIsAdminModalOpen(true);
               }}
               className="px-3.5 py-2 bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>
-                {currentUser.role === 'MANAGER' ? 'Cài đặt Telegram Bot' : 'Kết nối Telegram'}
-              </span>
+              <span>Cài đặt Telegram</span>
             </button>
 
-            {currentUser.role === 'MANAGER' && (
-              <button
-                type="button"
-                onClick={() => {
-                  setAdminModalTab('STAFF');
-                  setIsAdminModalOpen(true);
-                }}
-                className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
-              >
-                <Users className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Nhân sự ({users.length})</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setAdminModalTab('STAFF');
+                setIsAdminModalOpen(true);
+              }}
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Cá nhân hóa</span>
+            </button>
 
             <button
               type="button"
@@ -755,13 +713,13 @@ export default function WorkScheduleAppPage() {
           </div>
         </div>
 
-        {/* STAFF FILTER BAR (FOR MANAGER) OR PRIVACY BANNER (FOR STAFF) */}
-        {currentUser.role === 'MANAGER' ? (
+        {/* ACCOUNT FILTER BAR (ONLY IF MULTIPLE ACCOUNTS VISIBLE) */}
+        {currentUser.role === 'MANAGER' && users.length > 1 && (
           <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mr-1">
                 <Users className="w-4 h-4 text-indigo-600" />
-                Lọc lịch theo nhân sự:
+                Tài khoản:
               </span>
 
               <button
@@ -773,7 +731,7 @@ export default function WorkScheduleAppPage() {
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                Tất cả nhân sự ({users.length})
+                Tất cả ({users.length})
               </button>
 
               {users.map((u) => {
@@ -798,29 +756,6 @@ export default function WorkScheduleAppPage() {
                 );
               })}
             </div>
-
-            <div className="text-[11px] text-slate-400 font-medium">
-              💡 Quyền Quản lý: Bạn đang xem được toàn bộ lịch của nhân viên
-            </div>
-          </div>
-        ) : (
-          <div className="bg-emerald-50/90 border border-emerald-200 px-4 py-3 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-900">
-            <div className="flex items-center gap-2 font-semibold">
-              <Lock className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>
-                Chế độ Tài khoản Nhân sự riêng biệt: Bạn chỉ xem và quản lý lịch làm việc của cá nhân mình ({currentUser.name}). Nhân viên khác không thể xem lịch của bạn.
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setAdminModalTab('STAFF');
-                setIsAdminModalOpen(true);
-              }}
-              className="text-emerald-700 font-bold underline hover:text-emerald-900"
-            >
-              Cài đặt Telegram Chat ID của tôi →
-            </button>
           </div>
         )}
 
@@ -955,7 +890,7 @@ export default function WorkScheduleAppPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm tên việc, nhân sự..."
+                placeholder="Tìm kiếm lịch trình..."
                 className="pl-8 pr-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs focus:outline-none focus:bg-white focus:border-indigo-500 w-44 sm:w-52"
               />
             </div>
@@ -1307,7 +1242,7 @@ export default function WorkScheduleAppPage() {
                             style={{ backgroundColor: assignee?.color || '#4F46E5' }}
                           />
                           <span className="font-bold text-slate-800">
-                            {assignee?.name || 'Nhân sự'}
+                            {assignee?.name || 'Cá nhân'}
                           </span>
                           <span className="text-slate-400">•</span>
                           <span className="font-semibold text-indigo-700">

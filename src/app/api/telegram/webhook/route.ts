@@ -99,12 +99,12 @@ export async function POST(req: NextRequest) {
 
         const replyLines = [
           `👋 Xin chào <b>${escapeHtml(fullName)}</b>!`,
-          `🤖 Đây là <b>Bot Nhắc Lịch Làm Việc Tự Động</b>.`,
+          `🤖 Đây là <b>Bot Nhắc Lịch Tự Động</b>.`,
           ``,
           `🆔 <b>Telegram Chat ID của bạn là:</b> <code>${chatIdStr}</code>`,
           matchedUser
-            ? `✅ Tài khoản của bạn đã được liên kết với nhân sự: <b>${escapeHtml(matchedUser.name)}</b> (${escapeHtml(matchedUser.department)}).`
-            : `💡 Hãy gửi mã Chat ID này cho Quản lý (hoặc Quản lý bấm nút "Quét người dùng vừa nhắn Bot" trên Web) để tự động gán lịch làm việc cho bạn.`,
+            ? `✅ Đã liên kết với tài khoản: <b>${escapeHtml(matchedUser.name)}</b>.`
+            : `💡 Hãy copy mã Chat ID này dán vào mục "Kết nối Telegram" trên Web (hoặc bấm nút "Quét tài khoản vừa nhắn Bot" trên Web) để tự động nhận lịch nhắc việc.`,
         ];
 
         await sendTelegramMessage({

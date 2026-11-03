@@ -109,14 +109,12 @@ export async function PUT(req: NextRequest) {
 
     const target = db.users[idx];
 
-    if (currentUser.role === 'MANAGER') {
-      if (body.name !== undefined) target.name = String(body.name).trim();
-      if (body.department !== undefined) target.department = String(body.department).trim();
-      if (body.role !== undefined) target.role = body.role === 'MANAGER' ? 'MANAGER' : 'STAFF';
-      if (body.color !== undefined) target.color = String(body.color);
-      if (body.active !== undefined) target.active = Boolean(body.active);
+    if (body.name !== undefined && String(body.name).trim() !== '') {
+      target.name = String(body.name).trim();
     }
-
+    if (body.color !== undefined) {
+      target.color = String(body.color);
+    }
     if (body.telegramChatId !== undefined) {
       target.telegramChatId = String(body.telegramChatId).trim();
     }
