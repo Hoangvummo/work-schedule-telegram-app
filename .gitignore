@@ -23,9 +23,14 @@ yarn-error.log*
 .env*.local
 .env
 
+# local database file (do not bundle read-only into Vercel)
+/data/
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel

@@ -299,6 +299,15 @@ function getKvCredentials(): { url: string; token: string } | null {
   return null;
 }
 
+function getGistCredentials(): { gistId: string; token: string } | null {
+  const gistId = (process.env.GITHUB_GIST_ID || '').trim();
+  const token = (process.env.GITHUB_STORAGE_TOKEN || '').trim();
+  if (gistId && token) {
+    return { gistId, token };
+  }
+  return null;
+}
+
 const KV_KEY = 'work_schedule_app_db_v1';
 
 export async function readDb(): Promise<DatabaseSchema> {
@@ -319,23 +328,44 @@ export async function readDb(): Promise<DatabaseSchema> {
         }
       }
     } catch (err) {
-      console.error('KV read error, falling back to local/tmp storage:', err);
+      console.error('KV read error:', err);
     }
   }
 
-  // 2. Đọc từ file local (data/database.json)
-  try {
-    if (fs.existsSync(LOCAL_DB_FILE)) {
-      const raw = fs.readFileSync(LOCAL_DB_FILE, 'utf-8');
-      const parsed = JSON.parse(raw) as DatabaseSchema;
-      global.__workScheduleMemoryDb = parsed;
-      return parsed;
+  // 2. Hỗ trợ Cloud Storage qua Private GitHub Gist (Hoạt động vĩnh viễn trên Vercel Serverless)
+  const gist = getGistCredentials();
+  if (gist) {
+    try {
+      const res = await fetch(`https://api.github.com/gists/${gist.gistId}`, {
+        headers: {
+          Authorization: `Bearer ${gist.token}`,
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'WorkSchedule-App',
+        },
+        cache: 'no-store',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const fileObj = data?.files?.['database.json'];
+        if (fileObj) {
+          let rawContent = fileObj.content;
+          if (fileObj.truncated && fileObj.raw_url) {
+            const rawRes = await fetch(fileObj.raw_url, { cache: 'no-store' });
+            rawContent = await rawRes.text();
+          }
+          if (rawContent) {
+            const parsed = JSON.parse(rawContent) as DatabaseSchema;
+            global.__workScheduleMemoryDb = parsed;
+            return parsed;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Gist cloud storage read error:', err);
     }
-  } catch {
-    // ignore
   }
 
-  // 3. Fallback đọc từ /tmp (trên môi trường Serverless Vercel khi chưa gắn KV)
+  // 3. Ưu tiên đọc từ /tmp hoặc bộ nhớ RAM trước (để trên Vercel không bị đè bởi file tĩnh read-only)
   try {
     if (fs.existsSync(TMP_DB_FILE)) {
       const raw = fs.readFileSync(TMP_DB_FILE, 'utf-8');
@@ -351,7 +381,19 @@ export async function readDb(): Promise<DatabaseSchema> {
     return global.__workScheduleMemoryDb;
   }
 
-  // 4. Khởi tạo dữ liệu mẫu lần đầu
+  // 4. Đọc từ file local (data/database.json) khi chạy máy cá nhân
+  try {
+    if (fs.existsSync(LOCAL_DB_FILE)) {
+      const raw = fs.readFileSync(LOCAL_DB_FILE, 'utf-8');
+      const parsed = JSON.parse(raw) as DatabaseSchema;
+      global.__workScheduleMemoryDb = parsed;
+      return parsed;
+    }
+  } catch {
+    // ignore
+  }
+
+  // 5. Khởi tạo dữ liệu mẫu lần đầu
   const initial = createInitialSeedData();
   await writeDb(initial);
   return initial;
@@ -359,6 +401,7 @@ export async function readDb(): Promise<DatabaseSchema> {
 
 export async function writeDb(db: DatabaseSchema): Promise<void> {
   global.__workScheduleMemoryDb = db;
+  const serialized = JSON.stringify(db, null, 2);
 
   // 1. Lưu lên Cloud KV / Upstash Redis nếu có
   const kv = getKvCredentials();
@@ -377,17 +420,45 @@ export async function writeDb(db: DatabaseSchema): Promise<void> {
     }
   }
 
-  // 2. Lưu vào file local data/database.json
-  try {
-    if (!fs.existsSync(LOCAL_DATA_DIR)) {
-      fs.mkdirSync(LOCAL_DATA_DIR, { recursive: true });
-    }
-    fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
-    return;
-  } catch {
-    // Nếu trên Vercel read-only filesystem, ghi vào /tmp
+  // 2. Lưu lên Cloud Storage qua Private GitHub Gist (Đảm bảo lưu vĩnh viễn trên Vercel)
+  const gist = getGistCredentials();
+  if (gist) {
     try {
-      fs.writeFileSync(TMP_DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+      await fetch(`https://api.github.com/gists/${gist.gistId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${gist.token}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'WorkSchedule-App',
+        },
+        body: JSON.stringify({
+          files: {
+            'database.json': {
+              content: serialized,
+            },
+          },
+        }),
+      });
+    } catch (err) {
+      console.error('Gist cloud storage write error:', err);
+    }
+  }
+
+  // 3. Luôn ghi bản sao vào /tmp để tốc độ truy xuất tức thì
+  try {
+    fs.writeFileSync(TMP_DB_FILE, serialized, 'utf-8');
+  } catch {
+    // ignore
+  }
+
+  // 4. Lưu vào file local data/database.json (khi chạy ở máy local)
+  if (!process.env.VERCEL) {
+    try {
+      if (!fs.existsSync(LOCAL_DATA_DIR)) {
+        fs.mkdirSync(LOCAL_DATA_DIR, { recursive: true });
+      }
+      fs.writeFileSync(LOCAL_DB_FILE, serialized, 'utf-8');
     } catch {
       // ignore
     }

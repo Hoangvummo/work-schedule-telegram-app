@@ -136,7 +136,7 @@ export default function WorkScheduleAppPage() {
 
   const checkAuthentication = useCallback(async () => {
     try {
-      const res = await fetch('/api/auth');
+      const res = await fetch('/api/auth', { cache: 'no-store' });
       const data = await res.json();
       if (data.availableAccounts) {
         setAvailableAccounts(data.availableAccounts);
@@ -153,37 +153,45 @@ export default function WorkScheduleAppPage() {
     }
   }, []);
 
-  const fetchScheduleData = useCallback(async () => {
-    if (!currentUser) return;
-    try {
-      // Compute range covering current month +/- 45 days
-      const baseStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}-01`;
-      const startRange = addDaysToDateStr(baseStr, -15);
-      const endRange = addDaysToDateStr(baseStr, 60);
+  const fetchScheduleData = useCallback(
+    async (overrideMonth?: { year: number; month: number }, overrideAssignee?: string) => {
+      if (!currentUser) return;
+      try {
+        const activeMonth = overrideMonth || currentMonth;
+        const activeAssignee = overrideAssignee ?? selectedAssigneeId;
 
-      const params = new URLSearchParams({
-        startDate: startRange,
-        endDate: endRange,
-      });
-      if (currentUser.role === 'MANAGER' && selectedAssigneeId !== 'ALL') {
-        params.set('assigneeId', selectedAssigneeId);
-      }
+        // Compute range covering current month +/- 45 days
+        const baseStr = `${activeMonth.year}-${String(activeMonth.month + 1).padStart(2, '0')}-01`;
+        const startRange = addDaysToDateStr(baseStr, -15);
+        const endRange = addDaysToDateStr(baseStr, 60);
 
-      const res = await fetch(`/api/tasks?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setTasks(data.tasks || []);
-        setOccurrences(data.occurrences || []);
-        setUsers(data.users || []);
-        if (data.serverTimeVN?.dateStr) {
-          setTodayVN(data.serverTimeVN.dateStr);
-          setTimeVN(data.serverTimeVN.timeStr);
+        const params = new URLSearchParams({
+          startDate: startRange,
+          endDate: endRange,
+        });
+        if (currentUser.role === 'MANAGER' && activeAssignee !== 'ALL') {
+          params.set('assigneeId', activeAssignee);
         }
+
+        const res = await fetch(`/api/tasks?${params.toString()}`, {
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setTasks(data.tasks || []);
+          setOccurrences(data.occurrences || []);
+          setUsers(data.users || []);
+          if (data.serverTimeVN?.dateStr) {
+            setTodayVN(data.serverTimeVN.dateStr);
+            setTimeVN(data.serverTimeVN.timeStr);
+          }
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
-  }, [currentUser, currentMonth, selectedAssigneeId]);
+    },
+    [currentUser, currentMonth, selectedAssigneeId]
+  );
 
   useEffect(() => {
     checkAuthentication();
@@ -275,13 +283,48 @@ export default function WorkScheduleAppPage() {
     });
     const data = await res.json();
     if (res.ok && data.ok) {
+      const savedTask: ScheduleTask = data.task;
+      let nextMonth = currentMonth;
+      let nextAssignee = selectedAssigneeId;
+
+      if (
+        selectedAssigneeId !== 'ALL' &&
+        savedTask.assigneeId !== selectedAssigneeId
+      ) {
+        nextAssignee = 'ALL';
+        setSelectedAssigneeId('ALL');
+      }
+      if (
+        scheduleTypeFilter !== 'ALL' &&
+        savedTask.scheduleType !== scheduleTypeFilter
+      ) {
+        setScheduleTypeFilter('ALL');
+      }
+
+      // Tự động nhảy lịch tới ngày bắt đầu của công việc vừa tạo để hiển thị ngay trước mắt
+      const focusDate =
+        savedTask.scheduleType === 'SINGLE'
+          ? savedTask.singleDate
+          : savedTask.scheduleType === 'MULTI_DATE'
+          ? savedTask.selectedDates?.[0]
+          : savedTask.recurrence?.startDate;
+
+      if (focusDate) {
+        setSelectedDate(focusDate);
+        const [fy, fm] = focusDate.split('-').map(Number);
+        if (fy && fm) {
+          nextMonth = { year: fy, month: fm - 1 };
+          setCurrentMonth(nextMonth);
+        }
+      }
+
       showToast(
         'success',
         isEdit
-          ? `Đã cập nhật lịch "${data.task.title}"`
-          : `Đã tạo lịch làm việc "${data.task.title}"`
+          ? `Đã cập nhật lịch "${savedTask.title}"`
+          : `Đã tạo lịch làm việc "${savedTask.title}" thành công!`
       );
-      await fetchScheduleData();
+      await fetchScheduleData(nextMonth, nextAssignee);
     } else {
       showToast('error', data.error || 'Lỗi lưu lịch làm việc');
     }

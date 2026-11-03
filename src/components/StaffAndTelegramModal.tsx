@@ -98,6 +98,11 @@ export default function StaffAndTelegramModal({
   useEffect(() => {
     if (isOpen) {
       loadTelegramData();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
       const map: Record<string, string> = {};
       for (const u of users) {
         map[u.id] = u.telegramChatId || '';
@@ -108,7 +113,7 @@ export default function StaffAndTelegramModal({
 
   async function loadTelegramData() {
     try {
-      const res = await fetch('/api/telegram');
+      const res = await fetch('/api/telegram', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (data.config) {
@@ -220,9 +225,12 @@ export default function StaffAndTelegramModal({
       if (!res.ok) {
         setStatusMsg({ type: 'error', text: data.error || 'Lỗi lưu cấu hình' });
       } else {
+        if (data.config) {
+          setConfig(data.config);
+        }
         setStatusMsg({
           type: 'success',
-          text: 'Đã lưu cấu hình Telegram Bot & Giờ báo tự động!',
+          text: 'Đã lưu cấu hình Telegram Bot & Giờ báo tự động thành công!',
         });
       }
     } finally {
